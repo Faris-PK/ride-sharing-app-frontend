@@ -5,6 +5,8 @@ import { JSX } from "react";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import DashboardPage from "./pages/DashboardPage";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -27,6 +29,7 @@ function App() {
         />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
+      <ToastContainer position="top-right" autoClose={5000} />
     </Router>
   );
 }
