@@ -1,54 +1,48 @@
-# React + TypeScript + Vite
+🚗 Ride-Sharing App (Frontend)
+📌 Overview
+This is the frontend of the Ride-Sharing Application, built using React and Google Maps API. It allows users to request rides, view optimized routes, and track rides in real-time.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+⚙️ Setup & Installation
+1️⃣ Clone the Repository
+sh
+Copy
+Edit
+git clone https://github.com/your-username/your-repo.git
+cd your-repo
+2️⃣ Install Dependencies
+sh
+Copy
+Edit
+npm install
+3️⃣ Configure Environment Variables
+Create a .env file in the project root and add the following values:
 
-Currently, two official plugins are available:
+ini
+Copy
+Edit
+VITE_API_URL=YOUR_BACKEND_API_URL
+VITE_BACKEND_URL=YOUR_BACKEND_URL
+VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
+🔴 Important:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Replace YOUR_BACKEND_API_URL with your actual backend API URL.
 
-## Expanding the ESLint configuration
+Replace YOUR_BACKEND_URL with your backend base URL.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Replace YOUR_GOOGLE_MAPS_API_KEY with your Google Maps API Key (Do NOT share it publicly).
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+🚀 Running the App
+Once the setup is complete, start the development server with:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+sh
+Copy
+Edit
+npm run dev
+This will run the app on http://localhost:5173/ or an available port.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+📌 Features
+✅ Google Maps Integration – Optimized route calculation
+✅ Ride Requests – Passengers can request rides
+✅ Driver Dashboard – Drivers can accept rides
+✅ Real-time Updates – WebSockets for live ride tracking
+✅ JWT Authentication – Secure login & signup
