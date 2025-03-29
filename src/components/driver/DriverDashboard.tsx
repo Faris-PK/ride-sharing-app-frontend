@@ -12,7 +12,6 @@ interface Ride {
   pickup: string;
   dropoff: string;
   status: 'Pending' | 'Accepted' | 'In Progress' | 'Completed' | 'Cancelled';
-  driverLocation?: { lat: number; lng: number; timestamp: string }; // Added
 }
 
 const STATUS_CONFIGS = {
@@ -56,6 +55,7 @@ const DriverDashboard: React.FC = () => {
       fetchPendingRides();
       fetchDriverRides();
 
+      // Initialize Socket.IO connection
       const newSocket = io(API_URL, { withCredentials: true });
       setSocket(newSocket);
 
@@ -81,36 +81,10 @@ const DriverDashboard: React.FC = () => {
     }
   }, [user]);
 
-  // Added: Send location updates when a ride is in progress
-  useEffect(() => {
-    if (user?.role === 'driver' && driverRides.some(ride => ride.status === 'In Progress')) {
-      const interval = setInterval(() => {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            const inProgressRide = driverRides.find(ride => ride.status === 'In Progress');
-            if (inProgressRide) {
-              try {
-                await axios.put(`/rides/location/${inProgressRide._id}`, {
-                  lat: latitude,
-                  lng: longitude,
-                });
-              } catch (err) {
-                console.error('Error updating location:', err);
-              }
-            }
-          },
-          (err) => console.error('Geolocation error:', err),
-          { enableHighAccuracy: true }
-        );
-      }, 5000); // Update every 5 seconds
-      return () => clearInterval(interval);
-    }
-  }, [driverRides, user]);
-
   const handleAcceptRide = async (rideId: string) => {
     try {
       await axios.post(`/rides/accept/${rideId}`);
+      // No need to refetch, handled by WebSocket
     } catch (err) {
       console.error('Error accepting ride:', err);
     }
@@ -119,6 +93,7 @@ const DriverDashboard: React.FC = () => {
   const handleUpdateStatus = async (rideId: string, status: string) => {
     try {
       await axios.put(`/rides/status/${rideId}`, { status });
+      // No need to refetch, handled by WebSocket
     } catch (err) {
       console.error('Error updating status:', err);
     }
