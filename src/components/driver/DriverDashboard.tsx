@@ -84,7 +84,6 @@ const DriverDashboard: React.FC = () => {
   const handleAcceptRide = async (rideId: string) => {
     try {
       await axios.post(`/rides/accept/${rideId}`);
-      // No need to refetch, handled by WebSocket
     } catch (err) {
       console.error('Error accepting ride:', err);
     }
@@ -93,7 +92,6 @@ const DriverDashboard: React.FC = () => {
   const handleUpdateStatus = async (rideId: string, status: string) => {
     try {
       await axios.put(`/rides/status/${rideId}`, { status });
-      // No need to refetch, handled by WebSocket
     } catch (err) {
       console.error('Error updating status:', err);
     }

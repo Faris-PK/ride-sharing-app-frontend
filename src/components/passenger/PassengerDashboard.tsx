@@ -47,10 +47,9 @@ const PassengerDashboard = () => {
     const newSocket = io(API_URL, { withCredentials: true });
     setSocket(newSocket);
 
-    // Listen for real-time events
     newSocket.on('ride:created', (ride: Ride) => {
       setRides((prevRides) => {
-        if (ride.passengerId === prevRides[0]?.passengerId) { // Assuming passengerId is in ride
+        if (ride.passengerId === prevRides[0]?.passengerId) { 
           return [ride, ...prevRides];
         }
         return prevRides;
@@ -66,7 +65,6 @@ const PassengerDashboard = () => {
       setRides((prevRides) => prevRides.map(r => r._id === ride._id ? ride : r));
     });
 
-    // Cleanup on unmount
     return () => {
       newSocket.disconnect();
     };
@@ -93,7 +91,7 @@ const PassengerDashboard = () => {
       <RideRequestModal
         isOpen={isRequestModalOpen}
         onClose={() => setIsRequestModalOpen(false)}
-        onRideRequested={() => {}} // No need to refetch, handled by WebSocket
+        onRideRequested={() => {}}
       />
 
       <RideRouteModal

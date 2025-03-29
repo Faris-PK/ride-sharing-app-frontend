@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { LogIn, User, Mail, Lock, Smartphone, Car } from 'lucide-react';
 import { IoCarSportSharp } from "react-icons/io5";
 
-// Define form inputs with optional fields for login and required for signup
 type FormInputs = {
   email: string;
   password: string;

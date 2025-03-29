@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, DirectionsRenderer } from '@react-google-maps/api';
-import axios from '../../api/axiosInstance';
 import { MapPin, XCircle } from 'lucide-react';
 
 interface RideRouteModalProps {
@@ -98,12 +97,12 @@ const RideRouteModal: React.FC<RideRouteModalProps> = ({ isOpen, onClose, pickup
                     directions={directions}
                     options={{
                       polylineOptions: {
-                        strokeColor: '#1976D2', // Google Maps blue
+                        strokeColor: '#1976D2', 
                         strokeOpacity: 0.8,
                         strokeWeight: 5,
                       },
                       markerOptions: {
-                        visible: true, // Show default markers
+                        visible: true, 
                       },
                     }}
                   />
