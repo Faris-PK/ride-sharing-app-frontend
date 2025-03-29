@@ -12,7 +12,7 @@ const LoginForm = () => {
     try {
       const res = await axios.post("/auth/login", data);
       const { user } = res.data;
-      dispatch(setUser({ name: user.name, email: data.email, role: user.role }));
+      dispatch(setUser({ id: user._id,name: user.name, email: data.email, role: user.role }));
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);

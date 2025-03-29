@@ -27,7 +27,10 @@ const SignupForm = () => {
     try {
       const res = await axios.post("/auth/signup", signupData);
       const { user } = res.data;
-      dispatch(setUser({ name: signupData.name, email: signupData.email, role: user.role }));
+      dispatch(setUser({
+        name: signupData.name, email: signupData.email, role: user.role,
+        id: ""
+      }));
       navigate("/dashboard");
     } catch (error) {
       console.error("Signup failed:", error);

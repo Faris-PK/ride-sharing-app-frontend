@@ -24,6 +24,7 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {
+        await axiosInstance.post("/auth/logout");
         store.dispatch(clearUser());
         window.location.href = "/login";
         return Promise.reject(refreshError);

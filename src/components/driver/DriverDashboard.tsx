@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import RideRouteModal from '../passenger/RideRouteModal';
 import { MapPin, CheckCircle, Map, Clock, Check, RefreshCw, X } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 
 interface Ride {
   _id: string;
@@ -21,19 +22,15 @@ const STATUS_CONFIGS = {
   Cancelled: { color: 'bg-red-100 text-red-800 border-red-200', icon: <X className="w-4 h-4 text-red-600" /> },
 };
 
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 const DriverDashboard: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [pendingRides, setPendingRides] = useState<Ride[]>([]);
   const [driverRides, setDriverRides] = useState<Ride[]>([]);
   const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
   const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (user?.role === 'driver') {
-      fetchPendingRides();
-      fetchDriverRides();
-    }
-  }, [user]);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const fetchPendingRides = async () => {
     try {
@@ -53,15 +50,53 @@ const DriverDashboard: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (user?.role === 'driver') {
+      fetchPendingRides();
+      fetchDriverRides();
+
+      // Initialize Socket.IO connection
+      const newSocket = io(API_URL, { withCredentials: true });
+      setSocket(newSocket);
+
+      newSocket.on('ride:created', (ride: Ride) => {
+        setPendingRides((prev) => [...prev, ride]);
+      });
+
+      newSocket.on('ride:accepted', (ride: Ride) => {
+        setPendingRides((prev) => prev.filter(r => r._id !== ride._id));
+        setDriverRides((prev) => {
+          const exists = prev.some(r => r._id === ride._id);
+          return exists ? prev.map(r => r._id === ride._id ? ride : r) : [ride, ...prev];
+        });
+      });
+
+      newSocket.on('ride:status-updated', (ride: Ride) => {
+        setDriverRides((prev) => prev.map(r => r._id === ride._id ? ride : r));
+      });
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, [user]);
+
   const handleAcceptRide = async (rideId: string) => {
-    await axios.post(`/rides/accept/${rideId}`);
-    fetchPendingRides();
-    fetchDriverRides();
+    try {
+      await axios.post(`/rides/accept/${rideId}`);
+      // No need to refetch, handled by WebSocket
+    } catch (err) {
+      console.error('Error accepting ride:', err);
+    }
   };
 
   const handleUpdateStatus = async (rideId: string, status: string) => {
-    await axios.put(`/rides/status/${rideId}`, { status });
-    fetchDriverRides();
+    try {
+      await axios.put(`/rides/status/${rideId}`, { status });
+      // No need to refetch, handled by WebSocket
+    } catch (err) {
+      console.error('Error updating status:', err);
+    }
   };
 
   const handleShowRoute = (ride: Ride) => {
@@ -75,7 +110,6 @@ const DriverDashboard: React.FC = () => {
     <div className="p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Driver Dashboard</h1>
 
-      {/* My Rides */}
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">My Rides</h2>
       {driverRides.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg mb-6">
@@ -141,7 +175,6 @@ const DriverDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Pending Rides */}
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Pending Rides</h2>
       {pendingRides.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -190,7 +223,6 @@ const DriverDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Route Modal */}
       {selectedRide && (
         <RideRouteModal
           isOpen={isRouteModalOpen}

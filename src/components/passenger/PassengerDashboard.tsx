@@ -3,6 +3,7 @@ import axios from '../../api/axiosInstance';
 import RideRequestModal from './RideRequestModal';
 import RideRouteModal from './RideRouteModal';
 import { Clock, Check, MapPin, X, RefreshCw, Map } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 
 interface Ride {
   _id: string;
@@ -10,36 +11,25 @@ interface Ride {
   dropoff: string;
   status: 'Pending' | 'Accepted' | 'In Progress' | 'Completed' | 'Cancelled';
   createdAt: string;
+  passengerId: string;
 }
 
 const STATUS_CONFIGS = {
-  Pending: {
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icon: <Clock className="w-4 h-4 text-yellow-600" />,
-  },
-  Accepted: {
-    color: 'bg-blue-100 text-blue-800 border-blue-200',
-    icon: <Check className="w-4 h-4 text-blue-600" />,
-  },
-  'In Progress': {
-    color: 'bg-purple-100 text-purple-800 border-purple-200',
-    icon: <RefreshCw className="w-4 h-4 text-purple-600" />,
-  },
-  Completed: {
-    color: 'bg-green-100 text-green-800 border-green-200',
-    icon: <MapPin className="w-4 h-4 text-green-600" />,
-  },
-  Cancelled: {
-    color: 'bg-red-100 text-red-800 border-red-200',
-    icon: <X className="w-4 h-4 text-red-600" />,
-  },
+  Pending: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: <Clock className="w-4 h-4 text-yellow-600" /> },
+  Accepted: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: <Check className="w-4 h-4 text-blue-600" /> },
+  'In Progress': { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: <RefreshCw className="w-4 h-4 text-purple-600" /> },
+  Completed: { color: 'bg-green-100 text-green-800 border-green-200', icon: <MapPin className="w-4 h-4 text-green-600" /> },
+  Cancelled: { color: 'bg-red-100 text-red-800 border-red-200', icon: <X className="w-4 h-4 text-red-600" /> },
 };
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const PassengerDashboard = () => {
   const [rides, setRides] = useState<Ride[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
   const [selectedRide, setSelectedRide] = useState<Ride | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const fetchRides = async () => {
     try {
@@ -52,6 +42,34 @@ const PassengerDashboard = () => {
 
   useEffect(() => {
     fetchRides();
+
+    // Initialize Socket.IO connection
+    const newSocket = io(API_URL, { withCredentials: true });
+    setSocket(newSocket);
+
+    // Listen for real-time events
+    newSocket.on('ride:created', (ride: Ride) => {
+      setRides((prevRides) => {
+        if (ride.passengerId === prevRides[0]?.passengerId) { // Assuming passengerId is in ride
+          return [ride, ...prevRides];
+        }
+        return prevRides;
+      });
+      fetchRides();
+    });
+
+    newSocket.on('ride:accepted', (ride: Ride) => {
+      setRides((prevRides) => prevRides.map(r => r._id === ride._id ? ride : r));
+    });
+
+    newSocket.on('ride:status-updated', (ride: Ride) => {
+      setRides((prevRides) => prevRides.map(r => r._id === ride._id ? ride : r));
+    });
+
+    // Cleanup on unmount
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
   const handleShowRoute = (ride: Ride) => {
@@ -75,7 +93,7 @@ const PassengerDashboard = () => {
       <RideRequestModal
         isOpen={isRequestModalOpen}
         onClose={() => setIsRequestModalOpen(false)}
-        onRideRequested={fetchRides}
+        onRideRequested={() => {}} // No need to refetch, handled by WebSocket
       />
 
       <RideRouteModal
@@ -114,7 +132,6 @@ const PassengerDashboard = () => {
                       <span>{ride.status}</span>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-5 h-5 text-green-500" />
@@ -125,7 +142,6 @@ const PassengerDashboard = () => {
                       <span className="text-gray-700 font-medium">To: {ride.dropoff}</span>
                     </div>
                   </div>
-
                   <button
                     onClick={() => handleShowRoute(ride)}
                     className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
