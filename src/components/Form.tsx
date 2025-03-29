@@ -27,17 +27,10 @@ const Form = ({ type, onSubmit }: FormProps) => {
 
   return (
 <div className="min-h-screen bg-gradient-to-br from-green-400 to-green-800 flex items-center justify-center p-4 relative overflow-hidden">
-{/* Decorative Background Shapes */}
-      
-      {/* <div className="absolute top-0 left-0 w-64 h-64 bg-black-200/30 rounded-full -translate-x-1/3 -translate-y-1/3 blur-2xl"></div>
-      <div className="absolute bottom-0 right-0 w-72 h-72 bg-green-500/30 rounded-full translate-x-1/3 translate-y-1/3 blur-2xl"></div>
-       */}
+
       <div className="relative w-full max-w-md z-10">
         <div className="bg-white rounded-2xl shadow-xl shadow-black-800 overflow-hidden">
-          {/* Decorative Gradient Header */}
-          {/* <div className="h-1 bg-gradient-to-r from--500 to-rose-600"></div> */}
-
-          {/* Content Container */}
+  
           <div className="p-6 space-y-4">
           <div className="text-center mb-4">
             <div className="bg-gradient-to-br from-green-500 to-green-600 w-16 h-16 rounded-xl mx-auto mb-2 flex items-center justify-center shadow-lg">
@@ -136,7 +129,6 @@ const Form = ({ type, onSubmit }: FormProps) => {
               </button>
             </form>
 
-            {/* Toggle between Login and Register */}
             <div className="text-center mt-4">
               <p className="text-xs text-gray-600">
                 {type === "login" ? "Don't have an account? " : "Already have an account? "}

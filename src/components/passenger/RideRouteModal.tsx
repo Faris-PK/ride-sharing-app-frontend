@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, DirectionsRenderer } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
 import axios from '../../api/axiosInstance';
 import { MapPin, XCircle } from 'lucide-react';
 
@@ -15,10 +15,11 @@ const RideRouteModal: React.FC<RideRouteModalProps> = ({ isOpen, onClose, pickup
   const [distance, setDistance] = useState<string>('');
   const [duration, setDuration] = useState<string>('');
   const [error, setError] = useState('');
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ['geometry'],
+    libraries: ['geometry', 'places'],
   });
 
   useEffect(() => {
@@ -43,6 +44,16 @@ const RideRouteModal: React.FC<RideRouteModalProps> = ({ isOpen, onClose, pickup
               }
             }
           );
+
+          // Fetch initial driver location (optional, assumes rideId is available)
+          const rideId = window.location.pathname.split('/').pop(); // Adjust based on your routing
+          if (rideId) {
+            const response = await axios.get(`/rides/my-rides`);
+            const ride = response.data.find((r: any) => r._id === rideId);
+            if (ride?.driverLocation) {
+              setDriverLocation(ride.driverLocation);
+            }
+          }
         } catch (err) {
           setError('Failed to load route');
         }
@@ -91,6 +102,7 @@ const RideRouteModal: React.FC<RideRouteModalProps> = ({ isOpen, onClose, pickup
                       bounds.extend(leg.start_location);
                       bounds.extend(leg.end_location);
                     });
+                    if (driverLocation) bounds.extend(driverLocation);
                     map.fitBounds(bounds);
                   }}
                 >
@@ -98,15 +110,14 @@ const RideRouteModal: React.FC<RideRouteModalProps> = ({ isOpen, onClose, pickup
                     directions={directions}
                     options={{
                       polylineOptions: {
-                        strokeColor: '#1976D2', // Google Maps blue
+                        strokeColor: '#1976D2',
                         strokeOpacity: 0.8,
                         strokeWeight: 5,
                       },
-                      markerOptions: {
-                        visible: true, // Show default markers
-                      },
+                      markerOptions: { visible: true },
                     }}
                   />
+                  {driverLocation && <Marker position={driverLocation} label="Driver" />}
                 </GoogleMap>
               </>
             ) : (

@@ -38,7 +38,6 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-gray-200 tracking-tight italic">Nav!go</h1>
           </div>
 
-          {/* User Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
